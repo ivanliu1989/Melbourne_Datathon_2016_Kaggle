@@ -16,3 +16,17 @@ SumModelGini <- function(solution, submission) {
 NormalizedGini <- function(solution, submission) {
   SumModelGini(solution, submission) / SumModelGini(solution, solution)
 }
+
+gini_auc <- function(res, mtd = 'G2A'){
+  if(mtd == 'G2A'){
+    auc <- (res + 1)/2
+    return(auc)
+  }else if(mtd == 'A2G'){
+    gini <- 2*res - 1
+    return(gini)
+  }else {
+    print('Wrong input!')
+    return(res)
+  }
+}
+
