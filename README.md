@@ -16,18 +16,13 @@ Example code in R and SQL to generate the Barista benchmark will be on the data 
 #### Initial Ideas for Data Exploration
 ##### Job_Jobs
 1.	Abstract length
-
 2.	Key words in abstract - Text mining
-
 3.	Raw_job_type – cleaning and binary
-
 4.	Job Title – cleaning and text mining
-
 5.	Salary range
 
 ##### Job_Clicks
 1.	Created_at
-
 a.	Date
 b.	Time
 c.	Time to job created
@@ -35,7 +30,6 @@ d.	Nth job clicks for User
 
 ##### Job_Search
 1.	Query – cleaning and text mining
-
 2.	Created_at – as Job_Clicks
 
 ##### Job_Impression
@@ -43,10 +37,7 @@ d.	Nth job clicks for User
 
 ##### Other
 1.	# of applicants
-
 2.	Nth of applicants
-
 3.	Location same?
-
 4.	# of applications
 
