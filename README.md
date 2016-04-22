@@ -20,6 +20,7 @@ Example code in R and SQL to generate the Barista benchmark will be on the data 
 3.	Raw_job_type – cleaning and binary
 4.	Job Title – cleaning and text mining
 5.	Salary range
+6.	Key words in title and counts of key words
 
 ##### Job_Clicks
 1.	Created_at
