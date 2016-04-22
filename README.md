@@ -1,4 +1,6 @@
 # Melbourne Datathon 2016 Kaggle
+https://inclass.kaggle.com/c/melbourne-datathon-2016
+
 This is the home of the predictive modelling component of the 2016 Melbourne Datathon.
 
 The objective is to predict if a job is in the 'Hotel and Tourism' category.
