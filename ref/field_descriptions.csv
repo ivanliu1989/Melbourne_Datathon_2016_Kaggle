@@ -1,0 +1,42 @@
+Column Name,Comments
+user_id,If the user is logged in it is the user_id of the user executing the search  else it is the cookied user session id .
+search_id,Unique ID representing a single search.
+raw_location,Location text entered into the location field on website
+location_id,When raw location is populated the GeoName ID is looked up against http://www.geonames.org/
+latitude,When raw location is populated the Latitude  is looked up against http://www.geonames.org/
+longitude,When raw location is populated the Longitude  is looked up against http://www.geonames.org/
+query,Search term entered in the query field on the website
+mobile_user,True / False value representing whether the search was conducted on a mobile device.
+created_at,UTC Date time the search event record was written to Elastic Search
+
+
+Column Name,Comments
+job_id,The unique ID of the Job which the user clicked on to view additional information.
+user_id,If the user is logged in it is the user_id of the user executing the search  else it is the cookied user session id .
+session_id,Cookied user session id.
+search_id,The search_id from job_search if the job was click from a search results page
+created_at,The UTC Date time the click event record was written to Elastic Search
+
+
+Column Name,Comments
+job_id,The Unique ID of the Job to which the stats pertain.
+user_id,If the user is logged in it is the user_id of the user executing the search  else it is the cookied user session id .
+session_id,Cookied user session id.
+search_id,The search_id from job_search from which this impression was created.
+search_ranking,The ranked position of the Job in the search results page  starting from top to bottom. Numbering continues across pagination.
+mobile_user,True / False value representing whether the search was conducted on a mobile device.
+created_at,The UTC Date time when the job impression event record was written to Elastic Search
+	
+	
+Column Name,Comments
+id,The unique ID that represent a single job.
+title,The title of the job.
+raw_location,The text description of the jobs location.
+location_id,When raw location is populated the GeoName ID is looked up against http://www.geonames.org/
+subclasses,The subclass ids that the job is identified as belonging to 
+salary_type,The remuneration level that has been calculated for this job. All salaries have been anualised
+salary_min,Minimum value of the Salary Range of the Job 
+salary_max,Maximum value of the Salary Range of the Job 
+raw_job_type,The job type of the job relating the amount of time the job requires
+abstract,A short description if the Job
+Segment,The market segment the job falls into. Values are 1 to 4 where 1 is low paid unskilled labour  4 is high paid high skilled employment  and 2 and 3 and somewhere in between
