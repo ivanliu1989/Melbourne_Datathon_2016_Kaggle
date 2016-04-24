@@ -12,7 +12,7 @@ memory.limit(123456)
 
 
 #location of data
-myFolder <- 'H:\\phil\\DataScienceMelbourne\\datathon2016\\seekdata\\Data\\Demo\\'
+myFolder <- '/Users/ivanliu/Downloads/datathon2016/data/all/'
 
 #read in the jobs data
 myFile1 <- 'jobs_all.csv'
