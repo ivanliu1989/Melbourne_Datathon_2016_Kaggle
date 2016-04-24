@@ -2,7 +2,7 @@ setwd('/Users/ivanliu/Downloads/datathon2016/Melbourne_Datathon_2016_Kaggle')
 rm(list=ls());gc()
 library(data.table)
 load('../data/model/total.RData')
-load('./freq_title_3grams.RData')
+load('./freq_title_2grams.RData')
 
 head(freq_title_2grams[[1212]],50)
 
@@ -12,6 +12,7 @@ for (i in head(freq_title_3grams[[1212]],50)$terms){
     myRows <- c(grep(pattern=i,x=total$title,ignore.case = TRUE), myRows)
 }
 myRows <- unique(myRows)
+myRows <- c(grep(pattern='barista',x=total$title,ignore.case = TRUE), myRows)
 
 #create a prediction
 total$prediction <- 0

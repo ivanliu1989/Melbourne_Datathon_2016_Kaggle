@@ -23,7 +23,7 @@ ngramify <- function(split_num=1, ngram_df, grams = 2){
     cat(paste('\n (Step 2 of 5) Start to convert chunks into n-grams matrix...'))
     ngram_chunks <- list()
     for (j in 1:split_num){
-        ngram_chunks[[j]] <- NGramTokenizer(chunks[[j]], Weka_control(min=grams,max=grams))    
+        ngram_chunks[[j]] <- NGramTokenizer(chunks[[j]][!is.na(chunks[[j]])], Weka_control(min=grams,max=grams))
     }
     rm(chunks); gc()
     
