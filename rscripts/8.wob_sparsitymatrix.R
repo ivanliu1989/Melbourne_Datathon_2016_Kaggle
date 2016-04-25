@@ -1,0 +1,22 @@
+setwd('/Users/ivanliu/Downloads/datathon2016/Melbourne_Datathon_2016_Kaggle')
+rm(list=ls());gc()
+library(data.table)
+load('../data/model/total.RData')
+source('./rscripts/0.ngram_split_func.R')
+
+text_vector <- total[total$class_id == 1212,'title']
+
+text_vector <- iconv(text_vector, to = 'utf-8', sub=' ')
+review_source <- VectorSource(text_vector)
+corpus <- Corpus(review_source)
+corpus <- tm_map(corpus, content_transformer(tolower), lazy = T)
+corpus <- tm_map(corpus, removePunctuation, lazy = T)
+corpus <- tm_map(corpus, stripWhitespace, lazy = T)
+corpus <- tm_map(corpus, removeWords, stopwords('english'), lazy = T)
+# corpus <- tm_map(corpus, stemDocument, 'english', lazy = T)
+# dtm <- DocumentTermMatrix(corpus)
+dtm2 <- DocumentTermMatrix(corpus)
+findFreqTerms(dtm,5)
+inspect(dtm2[1:10,100:110])
+# inspect(removeSparseTerms(dtm, 0.4))
+dtm2 <- as.matrix(dtm)

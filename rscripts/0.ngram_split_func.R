@@ -2,16 +2,19 @@ library(RWeka)
 library(tm)
 library(SnowballC)
 
-ngramify <- function(split_num=1, ngram_df, grams = 2){
+ngramify <- function(split_num=1, ngram_df, grams = 2, stop_word = T){
     cat(paste('Input data frame (rows:',length(ngram_df), '| size:',round(object.size(ngram_df)/1024/1024,0),
               'mb) \n are going to split into', split_num, 'and', grams, 'grams prediction chunks...'))
     
     ngram_df <- iconv(ngram_df, to = 'utf-8', sub=' ')
+    train=gsub("<br />","",train)
+    
     ngram_df <- tolower(ngram_df)
     ngram_df <- removePunctuation(ngram_df)
     ngram_df <- stripWhitespace(ngram_df)
-    ngram_df <- removeWords(ngram_df, stopwords('english'))
-    
+    if(stop_word){
+        ngram_df <- removeWords(ngram_df, stopwords('english'))
+    }
     cat(paste('\n (Step 1 of 5) Start to create chunks...'))
     
     chunks <- list()
@@ -46,7 +49,7 @@ ngramify <- function(split_num=1, ngram_df, grams = 2){
 }
 
 
-freqencize <- function(text_vector){
+freqencize <- function(text_vector, freq = FALSE){
     text_vector <- iconv(text_vector, to = 'utf-8', sub=' ')
     review_source <- VectorSource(text_vector)
     corpus <- Corpus(review_source)
@@ -57,8 +60,13 @@ freqencize <- function(text_vector){
     dtm <- DocumentTermMatrix(corpus)
     # findFreqTerms(dtm,5)
     dtm2 <- as.matrix(dtm)
-    frequency <- colSums(dtm2)
-    frequency <- sort(frequency, decreasing=TRUE)
-    return(frequency)
+    if(freq){
+        frequency <- colSums(dtm2)
+        frequency <- sort(frequency, decreasing=TRUE)
+        return(frequency)    
+    }else{
+        return(dtm2)
+    }
+    
 }
 
