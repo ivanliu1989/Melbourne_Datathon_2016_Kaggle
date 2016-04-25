@@ -57,6 +57,7 @@ freqencize <- function(text_vector, freq = FALSE){
     corpus <- tm_map(corpus, removePunctuation, lazy = T)
     corpus <- tm_map(corpus, stripWhitespace, lazy = T)
     corpus <- tm_map(corpus, removeWords, stopwords('english'), lazy = T)
+    corpus <- tm_map(corpus, stemDocument, 'english', lazy = T)
     dtm <- DocumentTermMatrix(corpus)
     # findFreqTerms(dtm,5)
     dtm2 <- as.matrix(dtm)
