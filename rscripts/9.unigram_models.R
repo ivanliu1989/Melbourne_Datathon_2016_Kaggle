@@ -51,10 +51,10 @@ for(i in 1:cv){
                      objective           = "binary:logistic",
                      booster             = "gbtree", # gblinear
                      eta                 = 0.2,
-                     max_depth           = 6,
+                     max_depth           = 7,
                      min_child_weight    = 3,
-                     subsample           = .8,
-                     colsample           = .6,
+                     subsample           = .9,
+                     colsample           = .8,
                      print.every.n       = 100
     )
     cat(paste0('Iteration: ', i, ' || Score: ', 2*(clf$bestScore-0.5)))
