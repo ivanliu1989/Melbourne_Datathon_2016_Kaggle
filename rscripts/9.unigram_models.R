@@ -4,6 +4,11 @@ rm(list=ls());gc()
 load('../model_clean.RData')
 library(xgboost)
 library(caret)
+library(Matrix)
+
+# rm_feat <- colSums(train[,2:(ncol(train)-1)])
+# test <- test[,c(TRUE,rm_feat<10,TRUE)]
+# train <- train[,c(TRUE,rm_feat<10,TRUE)]
 
 # eval_cus <- function(pred, act){
 #     library(caTools)
@@ -27,17 +32,17 @@ cv <- 10
 folds <- createFolds(train[,'hat'], k = cv, list = FALSE)
 dropitems <- c('job_id','hat')
 feature.names <- colnames(train)[!colnames(train) %in% dropitems] 
-
+i=1
 for(i in 1:cv){
     f <- folds==i
     
-    # 1. xgboost
+    # 1. xgboost 0.94703
     dval          <- xgb.DMatrix(data=train[f,feature.names],label=train[f,'hat'])
     dtrain        <- xgb.DMatrix(data=train[!f,feature.names],label=train[!f,'hat']) 
     watchlist     <- list(val=dval,train=dtrain)
     
     clf <- xgb.train(data                = dtrain,
-                     nrounds             = 1500, 
+                     nrounds             = 2000, 
                      early.stop.round    = 300,
                      watchlist           = watchlist,
                      eval_metric         = 'auc',
@@ -45,11 +50,11 @@ for(i in 1:cv){
                      maximize            = TRUE,
                      objective           = "binary:logistic",
                      booster             = "gbtree", # gblinear
-                     eta                 = 0.05,
+                     eta                 = 0.2,
                      max_depth           = 6,
                      min_child_weight    = 3,
-                     subsample           = 0.9,
-                     colsample           = 0.6,
+                     subsample           = .8,
+                     colsample           = .6,
                      print.every.n       = 100
     )
     cat(paste0('Iteration: ', i, ' || Score: ', 2*(clf$bestScore-0.5)))

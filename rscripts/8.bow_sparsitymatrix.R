@@ -4,24 +4,30 @@ library(data.table)
 load('../data/model/total.RData')
 source('./rscripts/0.ngram_split_func.R')
 
-text_vector <- total[,'title']
+text_vector <- paste0(total[,'title'],'. ', total[,'abstract'])
+# text_vector <- total[,'title']
 
 text_vector <- iconv(text_vector, to = 'utf-8', sub=' ')
 review_source <- VectorSource(text_vector)
 corpus <- Corpus(review_source)
 corpus <- tm_map(corpus, content_transformer(tolower), lazy = T)
 corpus <- tm_map(corpus, removePunctuation, lazy = T)
+corpus <- tm_map(corpus, removeNumbers, lazy = T)
 corpus <- tm_map(corpus, stripWhitespace, lazy = T)
 corpus <- tm_map(corpus, removeWords, stopwords('english'), lazy = T)
 corpus <- tm_map(corpus, stemDocument, 'english', lazy = T)
+# 
+# library("RWeka")
+# library(parallel)
+# options(mc.cores=1)
+# BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 1, max = 3))
+# dtm_bigram <- DocumentTermMatrix(corpus, control = list(tokenize = BigramTokenizer))
+dtm <- DocumentTermMatrix(corpus, control = list(minDocFreq = 5, wordLengths = c(3, Inf)))
+idf <- weightTfIdf(dtm, normalize = TRUE)
 
-dtm <- DocumentTermMatrix(corpus)
-# inspect(dtm[1:10,100:110])
-# inspect(removeSparseTerms(dtm, 0.01))
 library(Matrix)
-dtm_sim <- dtm[,findFreqTerms(dtm,5)]
+dtm_sim <- dtm[,findFreqTerms(dtm,2)] # 5
 dtm2 <- sparseMatrix(dtm_sim$i,dtm_sim$j,x=dtm_sim$v)
-# dtm2 <- as.matrix(dtm[,findFreqTerms(dtm,500)])
 dim(dtm2)
 all <- cbind(job_id = total$job_id, dtm2, hat = total$hat)
 train <- all[all[,'hat'] != -1, ]
@@ -29,12 +35,17 @@ test <- all[all[,'hat'] == -1, ]
 colnames(train) <- c('job_id', paste0('var_', 1:(ncol(train)-2)), 'hat')
 colnames(test) <- c('job_id', paste0('var_', 1:(ncol(train)-2)), 'hat')
 
-save(train,test, file ='../model_clean.RData')
-
 # remove features not in test
 rm_feat <- colSums(test)
 test <- test[,rm_feat!=0]
 train <- train[,rm_feat!=0]
+
+rm_feat <- colSums(train)
+test <- test[,rm_feat!=0]
+train <- train[,rm_feat!=0]
+
+save(train,test, file ='../model_trigram_freq_2.RData')
+
 
 ############
 # train ###
@@ -93,7 +104,9 @@ for(i in 1:cv){
 
 # ngrams
 library("RWeka")
-BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 2, max = 2))
+library(parallel)
+options(mc.cores=1)
+BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = 1, max = 3))
 dtm_bigram <- DocumentTermMatrix(corpus, control = list(tokenize = BigramTokenizer))
 
 # library(tm); library(tau);
