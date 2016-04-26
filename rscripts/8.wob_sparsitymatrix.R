@@ -29,14 +29,17 @@ test <- all[all[,'hat'] == -1, ]
 colnames(train) <- c('job_id', paste0('var_', 1:(ncol(train)-2)), 'hat')
 colnames(test) <- c('job_id', paste0('var_', 1:(ncol(train)-2)), 'hat')
 
-save(train,test, file ='../model.RData')
+save(train,test, file ='../model_clean.RData')
 
 # remove features not in test
 rm_feat <- colSums(test)
 test <- test[,rm_feat!=0]
 train <- train[,rm_feat!=0]
 
-# train
+############
+# train ###
+###########
+load('../model_clean.RData')
 library(xgboost)
 library(caret)
 ### Split Data ###
@@ -53,8 +56,8 @@ names(results) <- c('cv_num', 'AUC', 'LogLoss')
 nr <- 1500
 sr <- 300
 sp <- 0.01
-md <- 11
-mcw <- 1
+md <- 8
+mcw <- 10
 ss <- 0.96
 cs <- 0.45
 
@@ -69,16 +72,16 @@ for(i in 1:cv){
                      nrounds             = nr, 
                      early.stop.round    = sr,
                      watchlist           = watchlist,
-                     eval_metric         = 'logloss',
-                     maximize            = FALSE,
+                     eval_metric         = 'auc',
+                     maximize            = TRUE,
                      objective           = "binary:logistic",
-                     booster             = "gbtree",
+                     booster             = "gbtree", # gblinear
                      eta                 = sp,
                      max_depth           = md,
                      min_child_weight    = mcw,
                      subsample           = ss,
                      colsample           = cs,
-                     print.every.n       = 200
+                     print.every.n       = 10
     )
     
     ### Make predictions
