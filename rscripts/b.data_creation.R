@@ -6,13 +6,13 @@ source('./rscripts/a.preprocess_func.R')
 
 ### 1.TF/IDF features - title, abstract, raw_job_type, raw_location
 text_vector <- total$title
-dtm_title <- tfidf_func(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 3, idf = TRUE)
+dtm_title <- tfidf_func(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 3, idf = TRUE);
 dtm_title <- removeSparseTerms(dtm_title, 1 - 3/nrow(dtm_title)) #dtm[,findFreqTerms(dtm,1)] # 5
 dtm_title <- sparseMatrix(dtm_title$i,dtm_title$j,x=dtm_title$v)
 dim(dtm_title)
 
 text_vector <- total$abstract
-dtm_abstract <- tfidf_func(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 3, idf = TRUE)
+dtm_abstract <- tfidf_func(text_vector, ngrams = 1, minDocFreq = 5, wordLengths = 3, idf = TRUE)
 dtm_abstract <- removeSparseTerms(dtm_abstract, 1 - 3/nrow(dtm_abstract)) #dtm[,findFreqTerms(dtm,1)] # 5
 dtm_abstract <- sparseMatrix(dtm_abstract$i,dtm_abstract$j,x=dtm_abstract$v)
 dim(dtm_abstract)
@@ -29,6 +29,12 @@ dtm_location <- removeSparseTerms(dtm_location, 1 - 3/nrow(dtm_location)) #dtm[,
 dtm_location <- sparseMatrix(dtm_location$i,dtm_location$j,x=dtm_location$v)
 dim(dtm_location)
 
+save(dtm_title, 
+     dtm_abstract,
+     # dtm_job_type,
+     # dtm_location,
+     file = '../model_features_20160426.RData'
+     )
 # remove features not in test
 rm_feat <- colSums(test)
 test <- test[,rm_feat!=0]
