@@ -1,13 +1,13 @@
 setwd('/Users/ivanliu/Downloads/datathon2016/Melbourne_Datathon_2016_Kaggle')
 rm(list=ls());gc()
-load('../data/model/total.RData')
-load('../model_unigram_idf_final_scale.RData')
+# load('../data/model/total.RData')
+load('../model_unigram_idf_final_scale_20160428.RData')
 library(xgboost)
 library(caret)
 library(Matrix)
 library(caTools)
-class_id <- total$class_id
-rm(total); gc()
+# class_id <- total$class_id
+# rm(total); gc()
 
 ############
 # xgb ####
@@ -27,7 +27,7 @@ rm(total); gc()
     i=2
     for(i in 1:cv){
         f <- folds==i
-        # 1. xgboost 0.94703
+        # 1. xgboost 0.991413/0.982826
         dval          <- xgb.DMatrix(data=train[f,feature.names],label=train[f,'hat'])
         dtrain        <- xgb.DMatrix(data=train[!f,feature.names],label=train[!f,'hat']) 
         watchlist     <- list(val=dval,train=dtrain)
@@ -41,10 +41,10 @@ rm(total); gc()
                          objective           = "binary:logistic",
                          booster             = "gbtree", # gblinear
                          eta                 = 0.1,
-                         max_depth           = 22,
-                         min_child_weight    = 5,
-                         subsample           = .9,
-                         colsample           = .6,
+                         max_depth           = 26,
+                         min_child_weight    = 10,
+                         subsample           = .8,
+                         colsample           = .5,
                          print.every.n       = 1
         )
         cat(paste0('Iteration: ', i, ' || Score: ', 2*(clf$bestScore-0.5)))

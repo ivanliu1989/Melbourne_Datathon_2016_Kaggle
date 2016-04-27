@@ -24,7 +24,7 @@ i=2
 for(i in 1:cv){
     f <- folds==i
     
-    # 1. xgboost 0.94703
+    # 1. xgboost 0.991024/0.982048
     dval          <- xgb.DMatrix(data=train[f,feature.names],label=train[f,'hat'])
     dtrain        <- xgb.DMatrix(data=train[!f,feature.names],label=train[!f,'hat']) 
     watchlist     <- list(val=dval,train=dtrain)
@@ -38,11 +38,11 @@ for(i in 1:cv){
                      maximize            = TRUE,
                      objective           = "binary:logistic",
                      booster             = "gbtree", # gblinear
-                     eta                 = 0.1,
-                     max_depth           = 22,
-                     min_child_weight    = 5,
-                     subsample           = .9,
-                     colsample           = .6,
+                     eta                 = 0.2,
+                     max_depth           = 20,
+                     min_child_weight    = 10,
+                     subsample           = .87,
+                     colsample           = .7,
                      print.every.n       = 1
     )
     cat(paste0('Iteration: ', i, ' || Score: ', 2*(clf$bestScore-0.5)))
