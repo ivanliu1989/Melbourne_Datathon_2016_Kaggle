@@ -1,7 +1,7 @@
 setwd('/Users/ivanliu/Downloads/datathon2016/Melbourne_Datathon_2016_Kaggle')
 rm(list=ls());gc()
 
-load('../model_clean.RData')
+load('../model_unigram_idf_final_scale.RData')
 library(xgboost)
 library(caret)
 library(Matrix)
@@ -32,7 +32,7 @@ cv <- 10
 folds <- createFolds(train[,'hat'], k = cv, list = FALSE)
 dropitems <- c('job_id','hat')
 feature.names <- colnames(train)[!colnames(train) %in% dropitems] 
-i=1
+i=2
 for(i in 1:cv){
     f <- folds==i
     
@@ -42,7 +42,7 @@ for(i in 1:cv){
     watchlist     <- list(val=dval,train=dtrain)
     
     clf <- xgb.train(data                = dtrain,
-                     nrounds             = 2000, 
+                     nrounds             = 500, 
                      early.stop.round    = 300,
                      watchlist           = watchlist,
                      eval_metric         = 'auc',
@@ -50,11 +50,11 @@ for(i in 1:cv){
                      maximize            = TRUE,
                      objective           = "binary:logistic",
                      booster             = "gbtree", # gblinear
-                     eta                 = 0.2,
-                     max_depth           = 7,
-                     min_child_weight    = 3,
+                     eta                 = 0.15,
+                     max_depth           = 22,
+                     min_child_weight    = 5,
                      subsample           = .9,
-                     colsample           = .8,
+                     colsample           = .6,
                      print.every.n       = 100
     )
     cat(paste0('Iteration: ', i, ' || Score: ', 2*(clf$bestScore-0.5)))

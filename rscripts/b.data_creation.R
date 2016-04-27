@@ -31,30 +31,34 @@ dim(dtm_location)
 
 save(dtm_title, 
      dtm_abstract,
-     # dtm_job_type,
-     # dtm_location,
+     dtm_job_type,
+     dtm_location,
      file = '../model_features_20160426.RData'
      )
-# remove features not in test
-rm_feat <- colSums(test)
-test <- test[,rm_feat!=0]
-train <- train[,rm_feat!=0]
-
-rm_feat <- colSums(train)
-test <- test[,rm_feat!=0]
-train <- train[,rm_feat!=0]
-
-save(train,test, file ='../model_unigram_idf_2.RData')
-
+load('../model_features_20160426.RData')
 
 ### 2. binary features - salary_type
 salary_type <- ifelse(total$salary_type == 'h', 0, 1)
+salary_type[is.na(salary_type)] <- 1
 
 ### 3. numerical features - salary_min, salary_max
 salary_min <- total$salary_min; salary_min[is.na(salary_min)] <- -1
 salary_max <- total$salary_max; salary_max[is.na(salary_max)] <- -1
 
 ### 4. combine model data
+# remove features not in test
+rm_feat <- colSums(dtm_title[all[,'hat']==-1,])
+dtm_title <- dtm_title[,rm_feat!=0]
+
+rm_feat <- colSums(dtm_abstract[all[,'hat']==-1,])
+dtm_abstract <- dtm_abstract[,rm_feat!=0]
+
+rm_feat <- colSums(dtm_job_type[all[,'hat']==-1,])
+dtm_job_type <- dtm_job_type[,rm_feat!=0]
+
+rm_feat <- colSums(dtm_location[all[,'hat']==-1,])
+dtm_location <- dtm_location[,rm_feat!=0]
+
 all <- cbind(job_id = total$job_id, 
              dtm_title,
              dtm_abstract,
@@ -65,21 +69,15 @@ all <- cbind(job_id = total$job_id,
              salary_max = salary_max,
              hat = total$hat)
 colnames(all) <- c('job_id', 
-                   paste0('title_',colnames(dtm_title)),
-                   paste0('abstr_',colnames(dtm_abstract)),
-                   paste0('type_',colnames(dtm_job_type)),
-                   paste0('loc_',colnames(dtm_location)),
+                   paste0('title_',1:ncol(dtm_title)),
+                   paste0('abstr_',1:ncol(dtm_abstract)),
+                   paste0('type_',1:ncol(dtm_job_type)),
+                   paste0('loc_',1:ncol(dtm_location)),
                    'salary_type', 'salary_min', 'salary_max', 'hat')
+
+all[,'salary_min'] <- scale(all[,'salary_min'])
+all[,'salary_max'] <- scale(all[,'salary_max'])
 train <- all[all[,'hat'] != -1, ]
 test <- all[all[,'hat'] == -1, ]
 
-# remove features not in test
-rm_feat <- colSums(test)
-test <- test[,rm_feat!=0]
-train <- train[,rm_feat!=0]
-
-rm_feat <- colSums(train)
-test <- test[,rm_feat!=0]
-train <- train[,rm_feat!=0]
-
-save(train,test, file ='../model_unigram_idf_final.RData')
+save(train,test, file ='../model_unigram_idf_final_scale.RData')
