@@ -5,6 +5,7 @@ options(mc.cores=1)
 
 tfidf_func <- function(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 3, idf = TRUE){
     cat('load data... \n')
+    text_vector <- iconv(text_vector, to = 'utf-8', sub=' ')
     review_source <- VectorSource(text_vector)
     cat('create corpus... \n')
     corpus <- Corpus(review_source)

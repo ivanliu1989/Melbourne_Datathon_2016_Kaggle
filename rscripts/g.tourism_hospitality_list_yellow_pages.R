@@ -11,6 +11,7 @@ categories <- c('Airlines%20&%20Travel%20Agents',
                 'Tourist%20Attractions%20&%20Information',
                 'Travel%20Agents',
                 'Hospitality%20(Training%20&%20Development)')
+
 urls <- paste0('http://www.yellowpages.com.au/search/listings?clue=',categories,'&pageNumber=')
 xpath<-"//meta[@itemprop='name']"
 content<-"content"
@@ -25,3 +26,7 @@ for (url in urls){
         dt_total <- rbind(dt_total, dt)
     }
 }
+
+dt_total <- dt_total[-1,]
+save(dt_total, file='./business_name.RData')
+#86 cafes
