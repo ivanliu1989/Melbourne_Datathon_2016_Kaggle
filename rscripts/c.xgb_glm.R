@@ -1,7 +1,8 @@
 setwd('/Users/ivanliu/Downloads/datathon2016/Melbourne_Datathon_2016_Kaggle')
 rm(list=ls());gc()
 # load('../data/model/total.RData')
-load('../model_unigram_idf_final_scale_20160428.RData')
+# load('../model_unigram_idf_final_scale_20160428.RData')
+load('../data_new/model_unigram_idf_final_scale_20160428.RData')
 library(xgboost)
 library(caret)
 library(Matrix)
@@ -13,7 +14,7 @@ library(caTools)
 # xgb ####
 ############
 evalerror = function(preds, dtrain) {
-    labels <- getinfo(dtrain, "hat")
+    labels <- getinfo(dtrain, "obj_hat")
     err <- colAUC(preds,labels,plotROC=FALSE)[1]
     err <- 2 * (err - 0.5)
     return(list(metric = "gini", value = err))
@@ -21,18 +22,18 @@ evalerror = function(preds, dtrain) {
 ### Split Data ###
 set.seed(23)
 cv <- 10
-folds <- createFolds(train[,'hat'], k = cv, list = FALSE)
-dropitems <- c('job_id','hat')
+folds <- createFolds(train[,'obj_hat'], k = cv, list = FALSE)
+dropitems <- c('job_id','obj_hat')
 feature.names <- colnames(train)[!colnames(train) %in% dropitems] 
 i=2
 for(i in 1:cv){
     f <- folds==i
     # 1. xgboost 0.991413/0.982826
-    dval          <- xgb.DMatrix(data=train[f,feature.names],label=train[f,'hat'])
-    dtrain        <- xgb.DMatrix(data=train[!f,feature.names],label=train[!f,'hat']) 
+    dval          <- xgb.DMatrix(data=train[f,feature.names],label=train[f,'obj_hat'])
+    dtrain        <- xgb.DMatrix(data=train[!f,feature.names],label=train[!f,'obj_hat']) 
     watchlist     <- list(val=dval,train=dtrain)
     clf <- xgb.train(data                = dtrain,
-                     nrounds             = 500, 
+                     nrounds             = 2500, 
                      early.stop.round    = 300,
                      watchlist           = watchlist,
                      eval_metric         = 'auc',
@@ -56,15 +57,15 @@ for(i in 1:cv){
 library(glmnet)
 set.seed(23)
 cv <- 10
-folds <- createFolds(train[,'hat'], k = cv, list = FALSE)
+folds <- createFolds(train[,'obj_hat'], k = cv, list = FALSE)
 f <- folds == 2 
-fit <- glmnet(train[!f, 2:(ncol(train)-4)], as.factor(train[!f, 'hat']),
+fit <- glmnet(train[!f, 2:(ncol(train)-4)], as.factor(train[!f, 'obj_hat']),
               family = 'binomial', alpha = 1, standardize = TRUE,
               intercept = TRUE, thresh = 1e-7, maxit = 10^5, type.gaussian = 'naive',
               type.logistic = 'modified.Newton'
 )
 preds <- predict(fit, train[f,2:(ncol(train)-4)],type="class")
-evalerror(as.numeric(preds[,32]),train[f,'hat'])
+evalerror(as.numeric(preds[,32]),train[f,'obj_hat'])
 # 0.7961559
 
 ############
@@ -72,7 +73,7 @@ evalerror(as.numeric(preds[,32]),train[f,'hat'])
 ###a########
 # devtools::install_github("JohnLangford/vowpal_wabbit", subdir = "R/r.vw")
 library(r.vw)
-feat <- colnames(train)[2:(ncol(train)-1)]; target <- 'hat'
+feat <- colnames(train)[2:(ncol(train)-1)]; target <- 'obj_hat'
 train_dt <- dt2vw(data = train[!f,2:(ncol(train))], target = target, fileName = '../data/vw/train_dt.vw')
 test_dt <- to_vw(train[f,], feat, target, '../data/vw/test_dt.vw')
 write.table(test_dt[,hat], file='data/vw/test_labels.txt', row.names = F, col.names = F, quote = F)

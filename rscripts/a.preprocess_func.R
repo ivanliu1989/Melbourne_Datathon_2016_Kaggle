@@ -3,9 +3,10 @@ library(RWeka)
 library(parallel)
 options(mc.cores=1)
 
-tfidf_func <- function(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 3, idf = TRUE){
-    cat('load data... \n')
+tfidf_func <- function(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 3, wordLengths_max = 20, idf = TRUE){
+    cat('removing special characters... \n')
     text_vector <- iconv(text_vector, to = 'utf-8', sub=' ')
+    cat('load data... \n')
     review_source <- VectorSource(text_vector)
     cat('create corpus... \n')
     corpus <- Corpus(review_source)
@@ -29,7 +30,7 @@ tfidf_func <- function(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 3,
             dtm_bigram <- DocumentTermMatrix(corpus, 
                                              control = list(tokenize = BigramTokenizer,
                                                             minDocFreq = minDocFreq, 
-                                                            wordLengths = c(wordLengths, Inf),
+                                                            wordLengths = c(wordLengths, wordLengths_max),
                                                             weighting = weightTfIdf)
                                              # ,bounds=list(global=c(floor(length(corpus)*0.05), Inf))
                                              )
@@ -37,7 +38,7 @@ tfidf_func <- function(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 3,
             cat(paste0('tf-idf with ',ngrams,'-grams. Minimum word length: ', wordLengths, '. Minimum frequencies: ', minDocFreq, '.  \n'))
             dtm <- DocumentTermMatrix(corpus, 
                                       control = list(minDocFreq = minDocFreq,
-                                                     wordLengths = c(wordLengths, Inf),
+                                                     wordLengths = c(wordLengths, wordLengths_max),
                                                      weighting = weightTfIdf)
                                       # ,bounds=list(global=c(floor(length(corpus)*0.05), Inf))
                                       ) 
@@ -49,14 +50,14 @@ tfidf_func <- function(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 3,
             dtm_bigram <- DocumentTermMatrix(corpus, 
                                              control = list(tokenize = BigramTokenizer,
                                                             minDocFreq = minDocFreq, 
-                                                            wordLengths = c(wordLengths, Inf))
+                                                            wordLengths = c(wordLengths, wordLengths_max))
                                              # ,bounds=list(global=c(floor(length(corpus)*0.05), Inf))
                                              )
         }else{
             cat(paste0('term-frequency with ',ngrams,'-grams. Minimum word length: ', wordLengths, '. Minimum frequencies: ', minDocFreq, '.  \n'))
             dtm <- DocumentTermMatrix(corpus, 
                                       control = list(minDocFreq = minDocFreq,
-                                                     wordLengths = c(wordLengths, Inf))
+                                                     wordLengths = c(wordLengths, wordLengths_max))
                                       # ,bounds=list(global=c(floor(length(corpus)*0.05), Inf))
                                       )
         }
