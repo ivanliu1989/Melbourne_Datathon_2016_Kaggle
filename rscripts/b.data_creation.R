@@ -55,62 +55,75 @@ source('./rscripts/a.preprocess_func.R')
     salary_type[is.na(salary_type)] <- 1
 
 ### 3. numerical features - salary_min, salary_max
-    salary_min <- total$salary_min; salary_min[is.na(salary_min)] <- -1
-    salary_max <- total$salary_max; salary_max[is.na(salary_max)] <- -1
-
+    load('../data_new/avg_salary.RData')
+    feat_list <- c()
+    for(c in unique(total$class_id)[!is.na(unique(total$class_id))]){
+        feat_name <- paste0('min_salary_ratio_',c)
+        total[,feat_name] <- total[,'salary_min'] / avg_salary[c,'min_salary']
+        total[is.na(total[,feat_name]),feat_name] <- 1
+        feat_list <- c(feat_list, feat_name)
+    }
+    for(c in unique(total$class_id)[!is.na(unique(total$class_id))]){
+        feat_name <- paste0('max_salary_ratio_',c)
+        total[,feat_name] <- total[,'salary_max'] / avg_salary[c,'max_salary']
+        total[is.na(total[,feat_name]),feat_name] <- 1
+        feat_list <- c(feat_list, feat_name)
+    }
+    for(c in unique(total$class_id)[!is.na(unique(total$class_id))]){
+        feat_name <- paste0('var_salary_ratio_',c)
+        total[,feat_name] <- (total[,'salary_max'] - total[,'salary_min']) / avg_salary[c,'var_salary']
+        total[is.na(total[,feat_name]),feat_name] <- 1
+        feat_list <- c(feat_list, feat_name)
+    }
+    salary_features <- total[,feat_list]
+    
+    
 ### 4. clicks & impression freq
-    load('../user_click_freq.RData')
-    load('../impression_freq.RData')
+    load('../data_new/user_click_freq_pct.RData')
+    load('../data_new/tgt_impr_cnt_pct.RData')
 
 ### 5. combine model data
 # remove features not in test
-    rm_feat <- colSums(dtm_all[total[,'hat']==-1,])
-    dtm_all <- dtm_all[,rm_feat!=0]
+    # rm_feat <- colSums(dtm_all[total[,'hat']==-1,])
+    # dtm_all <- dtm_all[,rm_feat!=0]
     
-#     rm_feat <- colSums(dtm_title[total[,'hat']==-1,])
-#     dtm_title <- dtm_title[,rm_feat!=0]
-#     
-#     rm_feat <- colSums(dtm_abstract[total[,'hat']==-1,])
-#     dtm_abstract <- dtm_abstract[,rm_feat!=0]
-#     
-#     rm_feat <- colSums(dtm_job_type[total[,'hat']==-1,])
-#     dtm_job_type <- dtm_job_type[,rm_feat!=0]
-#     
-#     rm_feat <- colSums(dtm_location[total[,'hat']==-1,])
-#     dtm_location <- dtm_location[,rm_feat!=0]
+    rm_feat <- colSums(dtm_title[total[,'hat']==-1,])
+    dtm_title <- dtm_title[,rm_feat!=0]
+    
+    rm_feat <- colSums(dtm_abstract[total[,'hat']==-1,])
+    dtm_abstract <- dtm_abstract[,rm_feat!=0]
+    
+    rm_feat <- colSums(dtm_job_type[total[,'hat']==-1,])
+    dtm_job_type <- dtm_job_type[,rm_feat!=0]
+    
+    rm_feat <- colSums(dtm_location[total[,'hat']==-1,])
+    dtm_location <- dtm_location[,rm_feat!=0]
     
     pt3 <- cbind(salary_type = salary_type,
-                 salary_min = salary_min,
-                 salary_max = salary_max,
-                 salary_variance = (salary_max - salary_min),
-                 tgt_impr_cnt = tgt_impr_cnt$impressions,
-                 tgt_user_click = tgt_user_click$clicks,
+                 salary_features,
+                 tgt_impr_cnt[,4:33],
+                 tgt_user_click[,4:33],
                  obj_hat = total$hat)
     colnames(pt3) <- c('salary_type','salary_min','salary_max','salary_var','tgt_impr_cnt','tgt_user_click','obj_hat')
     
     all <- cbind(job_id = total$job_id, 
-                 # dtm_title,
-                 # dtm_abstract,
-                 # dtm_job_type,
-                 # dtm_location,
-                 dtm_all,
+                 dtm_title,
+                 dtm_abstract,
+                 dtm_job_type,
+                 dtm_location,
+                 # dtm_all,
                  pt3
                  )
     
-    all[,'salary_min'] <- scale(all[,'salary_min'])
-    all[,'salary_max'] <- scale(all[,'salary_max'])
-    all[,'salary_var'] <- scale(all[,'salary_var'])
     train <- all[all[,'obj_hat'] != -1, ]
     test <- all[all[,'obj_hat'] == -1, ]
     
-    save(train,test, file ='../data_new/model_unigram_idf_final_scale_20160428.RData')
+    save(train,test, file ='../data_new/model_unigram_idf_final_20160428.RData')
 
     
     
-# user count (all categories, %) (% of them clicks other categories)
-# impressions (all categories, %)
-# segment - salary
-    
+### 6. key words frequency
+    load(file='../data_new/h.key_words_counts.RData')
     
     
     
