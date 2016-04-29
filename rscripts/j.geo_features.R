@@ -1,7 +1,9 @@
 setwd('/Users/ivanliu/Downloads/datathon2016/Melbourne_Datathon_2016_Kaggle')
 rm(list=ls());gc()
 load('../data/model/total.RData')
-order_id <- total$job_id
+
+total$id <- 1:nrow(total)
+order_id <- total$id
 
 #########################
 ### 1.geo information ###
@@ -88,17 +90,19 @@ missed_a_id <- missed_a_id[, c('job_id', 'feature_class', 'feature_code')] # 3. 
 # combine
 geo_infor_total <- rbind(total_geo_all[,2:4], missed_g_zip,missed_a_id, missed_g_id)
 geo_infor_total <- geo_infor_total[!duplicated(geo_infor_total$job_id),]
-geo_infor_total <- merge(total[,c('job_id','hat')], geo_infor_total, by = 'job_id', all.x = T)
+geo_infor_total <- merge(total[,c('job_id','hat','id')], geo_infor_total, by = 'job_id', all.x = T, all.y = F, sort = F)
 geo_infor_total[is.na(geo_infor_total$feature_class),3] <- 'gid_NA'
 geo_infor_total[is.na(geo_infor_total$feature_code),4] <- 'gid_NA'
+geo_infor_total <- geo_infor_total[order(match(geo_infor_total[,'id'],order_id)),]
+
 geo_infor_total$feature_class <- as.factor(geo_infor_total$feature_class)
 geo_infor_total$feature_code <- as.factor(geo_infor_total$feature_code)
 library(caret)
-dummies <- dummyVars(hat.y ~ ., data = geo_infor_total, sep = "_", levelsOnly = FALSE, fullRank = TRUE)
+dummies <- dummyVars(hat ~ ., data = geo_infor_total, sep = "_", levelsOnly = FALSE, fullRank = TRUE)
 geo_info_dummy <- predict(dummies, newdata = geo_infor_total)
-# geo_info_dummy[is.na(geo_info_dummy)] <- 0
-geo_info_dummy <- geo_info_dummy[,-c(2,21)]
-geo_info_dummy <- geo_info_dummy[order(match(geo_info_dummy[,'job_id'],order_id)),]
+geo_info_dummy[is.na(geo_info_dummy)] <- 0
+geo_info_dummy <- geo_info_dummy[,-c(2,21)] # check
+# geo_info_dummy <- geo_info_dummy[order(match(geo_info_dummy[,'id'],order_id)),]
 identical(total$job_id,geo_info_dummy[,'job_id'])
 total$job_id-geo_info_dummy$job_id
 save(geo_info_dummy, file='../data_new/geo_info_dummy.RData')
