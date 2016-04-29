@@ -3,6 +3,11 @@ library(RWeka)
 library(parallel)
 options(mc.cores=1)
 
+replacePunctuation <- function(strings){
+    gsub("[[:punct:]]", " ", strings)
+    return(strings)
+}
+
 tfidf_func <- function(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 3, wordLengths_max = 20, idf = TRUE){
     cat('removing special characters... \n')
     text_vector <- iconv(text_vector, to = 'utf-8', sub=' ')
@@ -12,7 +17,8 @@ tfidf_func <- function(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 3,
     corpus <- Corpus(review_source)
     cat('to lower case... \n')
     corpus <- tm_map(corpus, content_transformer(tolower), lazy = T)
-    cat('remove punctuation... \n')
+    cat('remove/replace punctuation... \n')
+    corpus <- tm_map(corpus, content_transformer(replacePunctuation), lazy = T)
     corpus <- tm_map(corpus, removePunctuation, lazy = T)
     cat('remove numerical characters... \n')
     corpus <- tm_map(corpus, removeNumbers, lazy = T)
