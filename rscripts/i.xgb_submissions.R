@@ -1,14 +1,11 @@
 setwd('/Users/ivanliu/Downloads/datathon2016/Melbourne_Datathon_2016_Kaggle')
 rm(list=ls());gc()
 # load('../data/model/total.RData')
-# load('../model_unigram_idf_final_scale_20160428.RData')
-load('../data_new/model_unigram_idf_final_20160428.RData')
+load('../data_new/model_unigram_idf_final_20160430.RData')
 library(xgboost)
 library(caret)
 library(Matrix)
 library(caTools)
-# class_id <- total$class_id
-# rm(total); gc()
 
 ### Split Data ###
 set.seed(23)
@@ -16,10 +13,11 @@ cv <- 10
 folds <- createFolds(train[,'obj_hat'], k = cv, list = FALSE)
 dropitems <- c('job_id','obj_hat')
 feature.names <- colnames(train)[!colnames(train) %in% dropitems] 
-i=3
-f <- folds==i
+i=c(2,8)
+f <- folds %in% i
 dval          <- xgb.DMatrix(data=train[f,feature.names],label=train[f,'obj_hat'])
-dtrain        <- xgb.DMatrix(data=train[,feature.names],label=train[,'obj_hat']) 
+dtrain        <- xgb.DMatrix(data=train[!f,feature.names],label=train[!f,'obj_hat']) 
+# dtrain        <- xgb.DMatrix(data=train[,feature.names],label=train[,'obj_hat']) 
 watchlist     <- list(val=dval,train=dtrain)
 clf <- xgb.train(data                = dtrain,
                  nrounds             = 500, 
@@ -37,3 +35,7 @@ clf <- xgb.train(data                = dtrain,
                  colsample           = .4,
                  print.every.n       = 1
 )
+
+submissions <- predict(clf, test[,feature.names])
+submissions <- cbind(job_id = test[,'job_id'], hat = submissions)
+write.csv(submissions, file='./pred/submissions_20160429_old_data.csv', row.names = F)

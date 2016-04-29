@@ -25,15 +25,15 @@ cv <- 10
 folds <- createFolds(train[,'obj_hat'], k = cv, list = FALSE)
 dropitems <- c('job_id','obj_hat')
 feature.names <- colnames(train)[!colnames(train) %in% dropitems] 
-i=2
+i=c(2,8)
 for(i in 1:cv){
-    f <- folds==i
+    f <- folds %in% i
     # 1. xgboost 0.991413/0.982826
     dval          <- xgb.DMatrix(data=train[f,feature.names],label=train[f,'obj_hat'])
     dtrain        <- xgb.DMatrix(data=train[!f,feature.names],label=train[!f,'obj_hat']) 
     watchlist     <- list(val=dval,train=dtrain)
     clf <- xgb.train(data                = dtrain,
-                     nrounds             = 2500, 
+                     nrounds             = 500, 
                      early.stop.round    = 300,
                      watchlist           = watchlist,
                      eval_metric         = 'auc',
@@ -41,9 +41,9 @@ for(i in 1:cv){
                      maximize            = TRUE,
                      objective           = "binary:logistic",
                      booster             = "gbtree", # gblinear
-                     eta                 = 0.2,
-                     max_depth           = 6,
-                     min_child_weight    = 10,
+                     eta                 = 0.1,
+                     max_depth           = 22,
+                     min_child_weight    = 5,
                      subsample           = .8,
                      colsample           = .4,
                      print.every.n       = 1

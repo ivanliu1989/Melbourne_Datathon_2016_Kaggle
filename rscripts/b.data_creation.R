@@ -50,9 +50,13 @@ source('./rscripts/a.preprocess_func.R')
          dtm_abstract,
          dtm_job_type,
          dtm_location,
+         title_key_words_cnt,
+         abs_key_words_cnt,
+         type_key_words_cnt,
+         loc_key_words_cnt,
          file = '../data_new/model_features_20160430.RData'
          )
-    load('../data_new/model_features_20160430.RData')
+    # load('../data_new/model_features_20160430.RData')
 
 ### 2. binary features - salary_type
     salary_type <- ifelse(total$salary_type == 'h', 0, 1)
@@ -81,14 +85,22 @@ source('./rscripts/a.preprocess_func.R')
     }
     salary_features <- total[,feat_list]
     
-    
 ### 4. clicks & impression freq
     load('../data_new/user_click_freq_pct.RData')
     load('../data_new/tgt_impr_cnt_pct.RData')
     tgt_impr_all_cnt <- rowSums(tgt_impr_cnt[,4:33] > 0)
     tgt_user_click_cnt <- rowSums(tgt_user_click[,4:33] > 0)
+    identical(total$job_id,tgt_impr_cnt$job_id)
+    identical(total$job_id,tgt_impr_cnt$job_id)
     
-### 5. combine model data
+### 5. Geo Info
+    load('../data_new/geo_info_dummy.RData')
+    identical(total$job_id,geo_info_dummy$job_id)
+    
+### 6. Key word counts
+    load('../data_new/h.key_words_counts.RData')
+
+    ### 5. combine model data
 # remove features not in test
     # rm_feat <- colSums(dtm_all[total[,'hat']==-1,])
     # dtm_all <- dtm_all[,rm_feat!=0]
@@ -129,7 +141,7 @@ source('./rscripts/a.preprocess_func.R')
     train <- all[all[,'obj_hat'] != -1, ]
     test <- all[all[,'obj_hat'] == -1, ]
     
-    save(train,test, file ='../data_new/model_unigram_idf_final_20160428.RData')
+    save(train,test, file ='../data_new/model_unigram_idf_final_20160430.RData')
 
     
     
@@ -148,17 +160,14 @@ source('./rscripts/a.preprocess_func.R')
     # 3) duplicated records
     # 4) vw?
     
-    for(c in unique(total$class_id)[!is.na(unique(total$class_id))]){
-        # print(length(freq_list[[c]]))
-        print(mean(b[total$class_id == c]))
-    }
+#     for(c in unique(total$class_id)[!is.na(unique(total$class_id))]){
+#         # print(length(freq_list[[c]]))
+#         print(mean(b[total$class_id == c]))
+#     }
     
     
     
 ### 7. test run
-    
-    # 0.982138
-    
     library(xgboost)
     library(caret)
     library(Matrix)
@@ -169,15 +178,14 @@ source('./rscripts/a.preprocess_func.R')
     folds <- createFolds(train[,'obj_hat'], k = cv, list = FALSE)
     dropitems <- c('job_id','obj_hat')
     feature.names <- colnames(train)[!colnames(train) %in% dropitems] 
-    i=2
-    
-    f <- folds==i
-    # 1. xgboost 0.991413/0.982826
+
+    f <- folds %in% c(2)
+    # 1. xgboost 0.996185/0.99236
     dval          <- xgb.DMatrix(data=train[f,feature.names],label=train[f,'obj_hat'])
     dtrain        <- xgb.DMatrix(data=train[!f,feature.names],label=train[!f,'obj_hat']) 
     watchlist     <- list(val=dval,train=dtrain)
     clf <- xgb.train(data                = dtrain,
-                     nrounds             = 2500, 
+                     nrounds             = 500, 
                      early.stop.round    = 300,
                      watchlist           = watchlist,
                      eval_metric         = 'auc',
