@@ -91,14 +91,15 @@ missed_a_id <- missed_a_id[, c('job_id', 'feature_class', 'feature_code')] # 3. 
 geo_infor_total <- rbind(total_geo_all[,2:4], missed_g_zip,missed_a_id, missed_g_id)
 geo_infor_total <- geo_infor_total[!duplicated(geo_infor_total$job_id),]
 geo_infor_total <- merge(total[,c('job_id','hat','id')], geo_infor_total, by = 'job_id', all.x = T, all.y = F, sort = F)
+geo_infor_total <- geo_infor_total[order(match(geo_infor_total[,'id'],order_id)),]
+identical(geo_infor_total$job_id,total$job_id)
+
 geo_infor_total[is.na(geo_infor_total$feature_class),3] <- 'gid_NA'
 geo_infor_total[is.na(geo_infor_total$feature_code),4] <- 'gid_NA'
-geo_infor_total <- geo_infor_total[order(match(geo_infor_total[,'id'],order_id)),]
-
 geo_infor_total$feature_class <- as.factor(geo_infor_total$feature_class)
 geo_infor_total$feature_code <- as.factor(geo_infor_total$feature_code)
 library(caret)
-dummies <- dummyVars(hat ~ ., data = geo_infor_total, sep = "_", levelsOnly = FALSE, fullRank = TRUE)
+dummies <- dummyVars(hat ~ ., data = geo_infor_total[,-3], sep = "_", levelsOnly = FALSE, fullRank = TRUE)
 geo_info_dummy <- predict(dummies, newdata = geo_infor_total)
 geo_info_dummy[is.na(geo_info_dummy)] <- 0
 geo_info_dummy <- geo_info_dummy[,-c(2,21)] # check

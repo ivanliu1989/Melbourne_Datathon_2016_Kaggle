@@ -90,12 +90,10 @@ source('./rscripts/a.preprocess_func.R')
     load('../data_new/tgt_impr_cnt_pct.RData')
     tgt_impr_all_cnt <- rowSums(tgt_impr_cnt[,4:33] > 0)
     tgt_user_click_cnt <- rowSums(tgt_user_click[,4:33] > 0)
-    identical(total$job_id,tgt_impr_cnt$job_id)
-    identical(total$job_id,tgt_impr_cnt$job_id)
     
 ### 5. Geo Info
     load('../data_new/geo_info_dummy.RData')
-    identical(total$job_id,geo_info_dummy$job_id)
+    head(geo_info_dummy[,2:61])
     
 ### 6. Key word counts
     load('../data_new/h.key_words_counts.RData')
@@ -127,6 +125,7 @@ source('./rscripts/a.preprocess_func.R')
                  abs_key_words_cnt = abs_key_words_cnt,
                  type_key_words_cnt = type_key_words_cnt,
                  loc_key_words_cnt = loc_key_words_cnt,
+                 geo_info_dummy[,2:61],
                  obj_hat = total$hat))
     
     all <- cbind(job_id = total$job_id, 

@@ -5,6 +5,7 @@ total <- total[,c('job_id','class_id', 'hat')]; gc()
 
 total$id <- 1:nrow(total)
 order_id <- total$id
+
 #######################
 ### Tgt user clicks ###
 #######################
@@ -60,12 +61,12 @@ for(c in unique(total$class_id)[!is.na(unique(total$class_id))]){
     tgt_impr_cnt <- merge(total[,c('job_id','class_id', 'hat', 'id')], tgt_impr_num, by = 'job_id', all.x = T, all.y = F, sort = F)
     tgt_impr_cnt[is.na(tgt_impr_cnt[,feat_name]), feat_name] <- 0
     tgt_impr_cnt <- tgt_impr_cnt[order(match(tgt_impr_cnt$id,order_id)),]
-    print(identical(tgt_user_click$job_id, total$job_id))
+    print(identical(tgt_impr_cnt$job_id, total$job_id))
     
     total <- cbind(total, tgt_impr_cnt[,feat_name])
     colnames(total) <- c(colnames(total)[-length(colnames(total))], feat_name)
     cat(paste0(feat_name, ' finished. # NA: ', table(is.na(tgt_impr_cnt[,feat_name])), '. Range of clicks: ', 
-               range(tgt_impr_cnt[,feat_name])[1], ' ', range(tgt_impr_cnt[,feat_name])[2], '. \n'))
+               range(tgt_impr_cnt[,feat_name])[1], ' ', range(tgt_impr_cnt[,feat_name])[2], '. \n \n'))
 }
 
 total$tgt_impr_total <- rowSums(total[,5:ncol(total)])
