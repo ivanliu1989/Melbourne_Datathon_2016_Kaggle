@@ -35,6 +35,11 @@ clf <- xgb.train(data                = dtrain,
                  colsample           = .4,
                  print.every.n       = 1
 )
+cat(paste0('Iteration: ', i, ' || Score: ', 2*(clf$bestScore-0.5)))
+
+# source('./rscripts/z.archived/0.RCodeForGini.R')
+# submissions <- predict(clf, train[f,feature.names])
+# NormalizedGini(train[f,'obj_hat'], submissions) #0.9924685
 
 submissions <- predict(clf, test[,feature.names])
 submissions <- cbind(job_id = test[,'job_id'], hat = submissions)
