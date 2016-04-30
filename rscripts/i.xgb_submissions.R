@@ -16,8 +16,8 @@ feature.names <- colnames(train)[!colnames(train) %in% dropitems]
 i=c(2,8)
 f <- folds %in% i
 dval          <- xgb.DMatrix(data=train[f,feature.names],label=train[f,'obj_hat'])
-dtrain        <- xgb.DMatrix(data=train[!f,feature.names],label=train[!f,'obj_hat']) 
-# dtrain        <- xgb.DMatrix(data=train[,feature.names],label=train[,'obj_hat']) 
+# dtrain        <- xgb.DMatrix(data=train[!f,feature.names],label=train[!f,'obj_hat']) 
+dtrain        <- xgb.DMatrix(data=train[,feature.names],label=train[,'obj_hat']) 
 watchlist     <- list(val=dval,train=dtrain)
 clf <- xgb.train(data                = dtrain,
                  nrounds             = 500, 
@@ -38,4 +38,4 @@ clf <- xgb.train(data                = dtrain,
 
 submissions <- predict(clf, test[,feature.names])
 submissions <- cbind(job_id = test[,'job_id'], hat = submissions)
-write.csv(submissions, file='./pred/submissions_20160429_old_data.csv', row.names = F)
+write.csv(submissions, file='./pred/submissions_20160429_fin_data.csv', row.names = F)
