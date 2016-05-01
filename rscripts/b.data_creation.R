@@ -178,7 +178,7 @@ extra_feature <- colnames(pt3)
 train <- all[all[,'obj_hat'] != -1, ]
 test <- all[all[,'obj_hat'] == -1, ]
 
-save(train,test,extra_feature,file ='../data_new/model_unigram_idf_20160501_scale_full.RData')
+save(train,test,extra_feature,file ='../data_new/model_bigram_idf_20160501_scale_full.RData')
 
 
 

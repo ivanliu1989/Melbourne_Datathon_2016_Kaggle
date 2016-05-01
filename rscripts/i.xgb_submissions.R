@@ -1,11 +1,8 @@
 setwd('/Users/ivanliu/Downloads/datathon2016/Melbourne_Datathon_2016_Kaggle')
 rm(list=ls());gc()
 # load('../data/model/total.RData')
-# load('../data_new/model_unigram_idf_final_20160430.RData')
-load('../data_new/model_unigram_idf_20160501_scale.RData')
-# load('../data_new/model_unigram_tf_final_20160430.RData')
-# load('../data_new/model_unigram_idf_final_full.RData')
-# load('../data_new/model_unigram_tf_final_full.RData')
+# load('../data_new/model_unigram_idf_20160501_scale.RData')
+load('../data_new/model_bigram_idf_20160501_scale_full.RData')
 library(xgboost)
 library(caret)
 library(Matrix)
@@ -19,7 +16,7 @@ i=c(3,6)
 f <- folds %in% i
 # f <- createDataPartition(train[,'obj_hat'], p = .8,list = FALSE,times = 1)
 
-dropitems <- c('job_id','obj_hat', extra_feature[92:155])
+dropitems <- c('job_id','obj_hat', extra_feature)
 feature.names <- colnames(train)[!colnames(train) %in% dropitems] 
 
 dval          <- xgb.DMatrix(data=train[f,feature.names],label=train[f,'obj_hat'])
