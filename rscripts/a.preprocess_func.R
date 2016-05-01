@@ -33,7 +33,7 @@ tfidf_func <- function(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 3,
         if(ngrams > 1){
             cat(paste0('tf-idf with ',ngrams,'-grams. Minimum word length: ', wordLengths, '. Minimum frequencies: ', minDocFreq, '.  \n'))
             BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = ngrams, max = ngrams))
-            dtm_bigram <- DocumentTermMatrix(corpus, 
+            dtm <- DocumentTermMatrix(corpus, 
                                              control = list(tokenize = BigramTokenizer,
                                                             minDocFreq = minDocFreq, 
                                                             wordLengths = c(wordLengths, wordLengths_max),
@@ -53,7 +53,7 @@ tfidf_func <- function(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 3,
         if(ngrams > 1){
             cat(paste0('term-frequency with ',ngrams,'-grams. Minimum word length: ', wordLengths, '. Minimum frequencies: ', minDocFreq, '.  \n'))
             BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = ngrams, max = ngrams))
-            dtm_bigram <- DocumentTermMatrix(corpus, 
+            dtm <- DocumentTermMatrix(corpus, 
                                              control = list(tokenize = BigramTokenizer,
                                                             minDocFreq = minDocFreq, 
                                                             wordLengths = c(wordLengths, wordLengths_max))

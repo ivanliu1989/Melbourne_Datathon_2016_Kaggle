@@ -19,7 +19,7 @@ i=c(3,6)
 f <- folds %in% i
 # f <- createDataPartition(train[,'obj_hat'], p = .8,list = FALSE,times = 1)
 
-dropitems <- c('job_id','obj_hat', extra_feature[92:217])
+dropitems <- c('job_id','obj_hat', extra_feature[92:155])
 feature.names <- colnames(train)[!colnames(train) %in% dropitems] 
 
 dval          <- xgb.DMatrix(data=train[f,feature.names],label=train[f,'obj_hat'])
@@ -70,5 +70,5 @@ xgb.plot.importance(feat_imp)
 # 7 (Done). feature center & scale 
 
 
-
+# 328 991138
 

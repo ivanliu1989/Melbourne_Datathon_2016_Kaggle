@@ -15,33 +15,33 @@ source('./rscripts/a.preprocess_func.R')
 # dim(dtm_all)
 
 text_vector <- total$title
-dtm_title <- tfidf_func(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 2, wordLengths_max = 80, idf = T);
+dtm_title <- tfidf_func(text_vector, ngrams = 2, minDocFreq = 2, wordLengths = 2, wordLengths_max = 80, idf = T);
 # dtm_title <- removeSparseTerms(dtm_title, 1 - 3/nrow(dtm_title)) 
-bow_names <- colnames(dtm_title)
+bow_names <- paste0('bi_',colnames(dtm_title))
 dtm_title <- sparseMatrix(dtm_title$i,dtm_title$j,x=dtm_title$v,dimnames = list(NULL,bow_names))
 dim(dtm_title)
 title_key_words_cnt <- rowSums(dtm_title >0)
 
 text_vector <- total$abstract
-dtm_abstract <- tfidf_func(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 2, wordLengths_max = 80, idf = T)
+dtm_abstract <- tfidf_func(text_vector, ngrams = 2, minDocFreq = 2, wordLengths = 2, wordLengths_max = 80, idf = T)
 # dtm_abstract <- removeSparseTerms(dtm_abstract, 1 - 3/nrow(dtm_abstract))
-bow_names <- paste0('abs_',colnames(dtm_abstract))
+bow_names <- paste0('bi_abs_',colnames(dtm_abstract))
 dtm_abstract <- sparseMatrix(dtm_abstract$i,dtm_abstract$j,x=dtm_abstract$v,dimnames = list(NULL,bow_names))
 dim(dtm_abstract)
 abs_key_words_cnt <- rowSums(dtm_abstract >0)
 
 text_vector <- total$raw_job_type
-dtm_job_type <- tfidf_func(text_vector, ngrams = 1, minDocFreq = 2,wordLengths = 2, wordLengths_max = 80, idf = T);
+dtm_job_type <- tfidf_func(text_vector, ngrams = 2, minDocFreq = 2,wordLengths = 2, wordLengths_max = 80, idf = T);
 # dtm_job_type <- removeSparseTerms(dtm_job_type, 1 - 3/nrow(dtm_job_type)) 
-bow_names <- paste0('job_',colnames(dtm_job_type))
+bow_names <- paste0('bi_job_',colnames(dtm_job_type))
 dtm_job_type <- sparseMatrix(dtm_job_type$i,dtm_job_type$j,x=dtm_job_type$v,dimnames = list(NULL,bow_names))
 dim(dtm_job_type)
 type_key_words_cnt <- rowSums(dtm_job_type >0)
 
 text_vector <- total$raw_location
-dtm_location <- tfidf_func(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 2, wordLengths_max = 80, idf = T);
+dtm_location <- tfidf_func(text_vector, ngrams = 2, minDocFreq = 2, wordLengths = 2, wordLengths_max = 80, idf = T);
 # dtm_location <- removeSparseTerms(dtm_location, 1 - 3/nrow(dtm_location)) 
-bow_names <- paste0('loc_',colnames(dtm_location))
+bow_names <- paste0('bi_loc_',colnames(dtm_location))
 dtm_location <- sparseMatrix(dtm_location$i,dtm_location$j,x=dtm_location$v,dimnames = list(NULL,bow_names))
 dim(dtm_location)
 loc_key_words_cnt <- rowSums(dtm_location >0)
@@ -63,9 +63,11 @@ save(dtm_title_bi,
      abs_key_words_cnt_bi,
      type_key_words_cnt_bi,
      loc_key_words_cnt_bi,
-     file = '../data_new/model_features_20160501_idf_bigrams.RData'
+     file = '../data_new/idf_bigrams_full_20160501.RData'
 )
-load('../data_new/model_features_20160430.RData')
+load('../data_new/idf_unigrams_full_20160501.RData')
+# idf_unigrams_full_20160501.RData
+# idf_bigrams_full_20160501.RData
 
 ### 2. binary features - salary_type
 salary_type <- ifelse(total$salary_type == 'h', 0, 1)
@@ -124,6 +126,18 @@ dtm_job_type <- dtm_job_type[,rm_feat!=0]
 rm_feat <- colSums(dtm_location[total[,'hat']==-1,])
 dtm_location <- dtm_location[,rm_feat!=0]
 
+rm_feat <- colSums(dtm_title_bi[total[,'hat']==-1,])
+dtm_title_bi <- dtm_title_bi[,rm_feat!=0]
+
+rm_feat <- colSums(dtm_abstract_bi[total[,'hat']==-1,])
+dtm_abstract_bi <- dtm_abstract_bi[,rm_feat!=0]
+
+rm_feat <- colSums(dtm_job_type_bi[total[,'hat']==-1,])
+dtm_job_type_bi <- dtm_job_type_bi[,rm_feat!=0]
+
+rm_feat <- colSums(dtm_location_bi[total[,'hat']==-1,])
+dtm_location_bi <- dtm_location_bi[,rm_feat!=0]
+
 # 218
 pt3 <- as.matrix(cbind(salary_type = salary_type,
                        salary_features,
@@ -131,10 +145,16 @@ pt3 <- as.matrix(cbind(salary_type = salary_type,
                        tgt_impr_all_cnt = tgt_impr_all_cnt,
                        tgt_user_click[,5:34],
                        tgt_user_click_cnt = tgt_user_click_cnt,
-                       title_key_words_cnt = scale(title_key_words_cnt,center = T, scale = T),
-                       abs_key_words_cnt = scale(abs_key_words_cnt,center = T, scale = T),
-                       type_key_words_cnt = scale(type_key_words_cnt,center = T, scale = T),
-                       loc_key_words_cnt = scale(loc_key_words_cnt,center = T, scale = T),
+                       title_key_words_cnt = title_key_words_cnt,
+                       abs_key_words_cnt = abs_key_words_cnt,
+                       type_key_words_cnt = type_key_words_cnt,
+                       loc_key_words_cnt = loc_key_words_cnt,
+                       
+                       title_key_words_cnt_bi = title_key_words_cnt_bi,
+                       abs_key_words_cnt_bi = abs_key_words_cnt_bi,
+                       type_key_words_cnt_bi = type_key_words_cnt_bi,
+                       loc_key_words_cnt_bi = loc_key_words_cnt_bi,
+                       
                        geo_info_dummy[,2:61]))
 
 library(caret)
@@ -146,7 +166,10 @@ all <- cbind(job_id = total$job_id,
              dtm_abstract,
              dtm_job_type,
              dtm_location,
-             # dtm_all,
+             dtm_title_bi,
+             dtm_abstract_bi,
+             dtm_job_type_bi,
+             dtm_location_bi,
              pt3_scale,
              obj_hat = total$hat
 )
@@ -155,7 +178,7 @@ extra_feature <- colnames(pt3)
 train <- all[all[,'obj_hat'] != -1, ]
 test <- all[all[,'obj_hat'] == -1, ]
 
-save(train,test,extra_feature,file ='../data_new/model_unigram_idf_20160501_scale.RData')
+save(train,test,extra_feature,file ='../data_new/model_unigram_idf_20160501_scale_full.RData')
 
 
 
