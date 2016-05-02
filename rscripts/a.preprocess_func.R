@@ -1,5 +1,5 @@
 library(tm)
-library(RWeka)
+# library(RWeka)
 library(parallel)
 options(mc.cores=1)
 
@@ -32,14 +32,18 @@ tfidf_func <- function(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 3,
     if(idf){
         if(ngrams > 1){
             cat(paste0('tf-idf with ',ngrams,'-grams. Minimum word length: ', wordLengths, '. Minimum frequencies: ', minDocFreq, '.  \n'))
-            BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = ngrams, max = ngrams))
+            # BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = ngrams, max = ngrams))
+            
+            BigramTokenizer <- function(x){
+                unlist(lapply(ngrams(words(x), ngrams), paste, collapse = ""), use.names = FALSE)
+            }
             dtm <- DocumentTermMatrix(corpus, 
-                                             control = list(tokenize = BigramTokenizer,
-                                                            minDocFreq = minDocFreq, 
-                                                            wordLengths = c(wordLengths, wordLengths_max),
-                                                            weighting = weightTfIdf)
-                                             # ,bounds=list(global=c(floor(length(corpus)*0.05), Inf))
-                                             )
+                                      control = list(tokenize = BigramTokenizer,
+                                                     minDocFreq = minDocFreq, 
+                                                     wordLengths = c(wordLengths, wordLengths_max),
+                                                     weighting = weightTfIdf)
+                                      # ,bounds=list(global=c(floor(length(corpus)*0.05), Inf))
+            )
         }else{
             cat(paste0('tf-idf with ',ngrams,'-grams. Minimum word length: ', wordLengths, '. Minimum frequencies: ', minDocFreq, '.  \n'))
             dtm <- DocumentTermMatrix(corpus, 
@@ -47,25 +51,28 @@ tfidf_func <- function(text_vector, ngrams = 1, minDocFreq = 2, wordLengths = 3,
                                                      wordLengths = c(wordLengths, wordLengths_max),
                                                      weighting = weightTfIdf)
                                       # ,bounds=list(global=c(floor(length(corpus)*0.05), Inf))
-                                      ) 
+            ) 
         }
     }else{
         if(ngrams > 1){
             cat(paste0('term-frequency with ',ngrams,'-grams. Minimum word length: ', wordLengths, '. Minimum frequencies: ', minDocFreq, '.  \n'))
-            BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = ngrams, max = ngrams))
+            # BigramTokenizer <- function(x) NGramTokenizer(x, Weka_control(min = ngrams, max = ngrams))
+            BigramTokenizer <- function(x){
+                unlist(lapply(ngrams(words(x), ngrams), paste, collapse = ""), use.names = FALSE)
+            }
             dtm <- DocumentTermMatrix(corpus, 
-                                             control = list(tokenize = BigramTokenizer,
-                                                            minDocFreq = minDocFreq, 
-                                                            wordLengths = c(wordLengths, wordLengths_max))
-                                             # ,bounds=list(global=c(floor(length(corpus)*0.05), Inf))
-                                             )
+                                      control = list(tokenize = BigramTokenizer,
+                                                     minDocFreq = minDocFreq, 
+                                                     wordLengths = c(wordLengths, wordLengths_max))
+                                      # ,bounds=list(global=c(floor(length(corpus)*0.05), Inf))
+            )
         }else{
             cat(paste0('term-frequency with ',ngrams,'-grams. Minimum word length: ', wordLengths, '. Minimum frequencies: ', minDocFreq, '.  \n'))
             dtm <- DocumentTermMatrix(corpus, 
                                       control = list(minDocFreq = minDocFreq,
                                                      wordLengths = c(wordLengths, wordLengths_max))
                                       # ,bounds=list(global=c(floor(length(corpus)*0.05), Inf))
-                                      )
+            )
         }
     }
     return(dtm)
