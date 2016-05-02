@@ -66,6 +66,8 @@ save(dtm_title_bi,
      file = '../data_new/idf_bigrams_full_20160501.RData'
 )
 load('../data_new/idf_unigrams_full_20160501.RData')
+load('../data_new/idf_bigrams_full_20160501.RData')
+load('../data_new/idf_trigrams_full_20160501.RData')
 # idf_unigrams_full_20160501.RData
 # idf_bigrams_full_20160501.RData
 
@@ -95,6 +97,22 @@ for(c in unique(total$class_id)[!is.na(unique(total$class_id))]){
     feat_list <- c(feat_list, feat_name)
 }
 salary_features <- total[,feat_list]
+
+log.salary_min <- log(total$salary_min)
+log.salary_min <- ifelse(is.na(log.salary_min), mean(log.salary_min, na.rm = T), log.salary_min)
+
+log.salary_max <- log(total$salary_max)
+log.salary_max <- ifelse(is.na(log.salary_max), mean(log.salary_max, na.rm = T), log.salary_max)
+
+log.salary_mean <- ifelse(is.na(log((total$salary_max + total$salary_min) / 2))
+                          , mean(log((total$salary_max + total$salary_min) / 2), na.rm = T)
+                          , log((total$salary_max + total$salary_min) / 2)
+)
+
+log.salary_diff <- abs(ifelse(is.na((total$salary_max - total$salary_min))
+                              , mean((total$salary_max - total$salary_min), na.rm = T)
+                              , (total$salary_max - total$salary_min)
+))
 
 ### 4. clicks & impression freq
 load('../data_new/user_click_freq_pct.RData')
@@ -138,9 +156,20 @@ dtm_job_type_bi <- dtm_job_type_bi[,rm_feat!=0]
 rm_feat <- colSums(dtm_location_bi[total[,'hat']==-1,])
 dtm_location_bi <- dtm_location_bi[,rm_feat!=0]
 
+rm_feat <- colSums(dtm_title_tri[total[,'hat']==-1,])
+dtm_title_tri <- dtm_title_tri[,rm_feat!=0]
+
+rm_feat <- colSums(dtm_abstract_tri[total[,'hat']==-1,])
+dtm_abstract_tri <- dtm_abstract_tri[,rm_feat!=0]
+
 # 218
 pt3 <- as.matrix(cbind(salary_type = salary_type,
                        salary_features,
+                       log_salary_min = log.salary_min,
+                       log_salary_max = log.salary_max,
+                       log_salary_mean = log.salary_mean,
+                       log_salary_diff = log.salary_diff,
+                       
                        tgt_impr_cnt[,5:34],
                        tgt_impr_all_cnt = tgt_impr_all_cnt,
                        tgt_user_click[,5:34],
@@ -155,11 +184,20 @@ pt3 <- as.matrix(cbind(salary_type = salary_type,
                        type_key_words_cnt_bi = type_key_words_cnt_bi,
                        loc_key_words_cnt_bi = loc_key_words_cnt_bi,
                        
+                       title_key_words_cnt_tri = title_key_words_cnt_tri,
+                       abs_key_words_cnt_tri = abs_key_words_cnt_tri,
+
                        geo_info_dummy[,2:61]))
 
 library(caret)
 pre <- preProcess(pt3, method = c("center", "scale"))
 pt3_scale <- predict(pre, pt3)
+
+for(i in 1:ncol(pt3)){
+    print(i)
+    pt3[,i] <- scale(pt3[,i], center = T, scale = T)
+}
+pt3_scale <- pt3
 
 all <- cbind(job_id = total$job_id, 
              dtm_title,
@@ -170,6 +208,8 @@ all <- cbind(job_id = total$job_id,
              dtm_abstract_bi,
              dtm_job_type_bi,
              dtm_location_bi,
+             dtm_title_tri,
+             dtm_abstract_tri,
              pt3_scale,
              obj_hat = total$hat
 )
@@ -178,7 +218,7 @@ extra_feature <- colnames(pt3)
 train <- all[all[,'obj_hat'] != -1, ]
 test <- all[all[,'obj_hat'] == -1, ]
 
-save(train,test,extra_feature,file ='../data_new/model_bigram_idf_20160501_scale_full.RData')
+save(train,test,extra_feature,file ='../data_new/model_trigram_idf_20160501_scale_full.RData')
 
 
 

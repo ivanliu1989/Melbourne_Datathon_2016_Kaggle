@@ -24,16 +24,16 @@ dtrain        <- xgb.DMatrix(data=train[!f,feature.names],label=train[!f,'obj_ha
 # dtrain        <- xgb.DMatrix(data=train[,feature.names],label=train[,'obj_hat']) 
 watchlist     <- list(val=dval,train=dtrain)
 clf <- xgb.train(data                = dtrain,
-                 nrounds             = 1000, 
-                 early.stop.round    = 20,
+                 nrounds             = 3000, 
+                 early.stop.round    = 50,
                  watchlist           = watchlist,
                  eval_metric         = 'auc',                                       
                  # feval                = eval_cus,
                  maximize            = TRUE,
                  objective           = "binary:logistic",
                  booster             = "gbtree", # gblinear
-                 eta                 = 0.2,
-                 max_depth           = 12,
+                 eta                 = 0.1,
+                 max_depth           = 16,
                  # min_child_weight    = 10,
                  subsample           = .8,
                  colsample           = .4,
