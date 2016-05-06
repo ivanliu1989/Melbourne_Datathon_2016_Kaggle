@@ -17,7 +17,7 @@ xpath<-"//meta[@itemprop='name']"
 content<-"content"
 
 dt_total <- data.frame(url = 1, vari = 1)
-for (url in urls){
+for (url in urls[5:9]){
     cat(paste0(url,'\n'))
     for(page in 1:100){
         url_temp <- paste0(url,page)
@@ -27,6 +27,10 @@ for (url in urls){
     }
 }
 
-dt_total <- dt_total[-1,]
-save(dt_total, file='./business_name.RData')
+dt_total_2 <- dt_total[-1,]
+
+load('./business_name.RData')
+
+dt_total2 <- dt_total_2[!(dt_total_2$vari %in% dt_total$vari),]
+save(dt_total2, file='./business_name_2.RData')
 #86 cafes
